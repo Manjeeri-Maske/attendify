@@ -15,8 +15,20 @@
   .brand p{color:rgba(255,255,255,.65);font-size:.88rem}
   .card{background:#fff;border-radius:20px;padding:30px;box-shadow:0 24px 64px rgba(0,0,0,.35);border:none}
   .form-label{font-size:.78rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
-  .form-control,.custom-select{border-radius:10px;border:1.5px solid #e5e7eb;padding:10px 13px;font-size:.93rem}
-  .form-control:focus,.custom-select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);outline:none}
+  .form-control{border-radius:10px;border:1.5px solid #e5e7eb;padding:10px 13px;font-size:.93rem;width:100%;color:#111827;background:#fff}
+  .form-control:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);outline:none}
+  select.form-control{
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    background-color:#fff;
+    padding-right:40px;
+    cursor:pointer;
+  }
+  select.form-control option{color:#111827}
   .teacher-fields{display:none}
   .section-title{font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;padding-bottom:8px;border-bottom:1px solid #f3f4f6;margin:18px 0 14px}
   .btn-reg{background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:12px;padding:13px;font-size:1rem;font-weight:700;width:100%;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(5,150,105,.3)}
@@ -40,14 +52,16 @@
       {% for cat,msg in msgs %}<div class="alert alert-{{cat}} py-2 mb-3">{{msg}}</div>{% endfor %}
     {% endwith %}
     <form method="POST">
+
       <div class="form-group">
         <label class="form-label">Role</label>
-        <select name="role" id="roleSelect" class="custom-select" required onchange="toggleTeacher()">
-          <option value="">-- -- Select Role -- --</option>
+        <select name="role" id="roleSelect" class="form-control" required onchange="toggleTeacher()">
+          <option value="" disabled selected>-- Select Role --</option>
           <option value="admin">Administrator</option>
           <option value="teacher">Class Teacher</option>
         </select>
       </div>
+
       <div class="section-title">Personal Information</div>
       <div class="row">
         <div class="col-6 form-group">
@@ -73,6 +87,7 @@
           <input type="password" name="password2" class="form-control" placeholder="Repeat" required>
         </div>
       </div>
+
       <div class="teacher-fields" id="teacherFields">
         <div class="section-title">Teacher Details</div>
         <div class="form-group">
@@ -82,20 +97,25 @@
         <div class="row">
           <div class="col-6 form-group">
             <label class="form-label">Assigned Class</label>
-            <select name="classId" id="classSelect" class="custom-select" onchange="loadArms()">
-              <option value="">-- Select Class --</option>
-              {% for c in classes %}<option value="{{c.Id}}">{{c.className}}</option>{% endfor %}
+            <select name="classId" id="classSelect" class="form-control" onchange="loadArms()">
+              <option value="" disabled selected>-- Select Class --</option>
+              {% for c in classes %}
+              <option value="{{ c.Id }}">{{ c.className }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-6 form-group">
             <label class="form-label">Division</label>
-            <select name="classArmId" id="armSelect" class="custom-select">
-              <option value="">-- Select Division --</option>
+            <select name="classArmId" id="armSelect" class="form-control">
+              <option value="" disabled selected>-- Select Division --</option>
             </select>
           </div>
         </div>
       </div>
-      <button type="submit" class="btn-reg mt-2"><i class="fas fa-user-plus mr-2"></i>Register</button>
+
+      <button type="submit" class="btn-reg mt-2">
+        <i class="fas fa-user-plus mr-2"></i>Register
+      </button>
     </form>
     <div class="login-link">Already have an account? <a href="/">Login</a></div>
   </div>
@@ -103,8 +123,26 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function toggleTeacher(){document.getElementById('teacherFields').style.display=document.getElementById('roleSelect').value==='teacher'?'block':'none'}
-function loadArms(){var cid=document.getElementById('classSelect').value,sel=document.getElementById('armSelect');sel.innerHTML='<option value="">-- Division --</option>';if(!cid)return;fetch('/ajax/arms/'+cid).then(r=>r.json()).then(d=>d.forEach(a=>{var o=document.createElement('option');o.value=a.id;o.textContent=a.name;sel.appendChild(o)}))}
+function toggleTeacher() {
+  var role = document.getElementById('roleSelect').value;
+  document.getElementById('teacherFields').style.display = (role === 'teacher') ? 'block' : 'none';
+}
+function loadArms() {
+  var cid = document.getElementById('classSelect').value;
+  var sel = document.getElementById('armSelect');
+  sel.innerHTML = '<option value="">-- Division --</option>';
+  if (!cid) return;
+  fetch('/ajax/arms/' + cid)
+    .then(r => r.json())
+    .then(data => {
+      data.forEach(function(a) {
+        var opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        sel.appendChild(opt);
+      });
+    });
+}
 </script>
 </body>
 </html>
