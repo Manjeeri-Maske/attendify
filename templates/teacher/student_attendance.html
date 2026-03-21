@@ -1,0 +1,77 @@
+{% extends "teacher/base.html" %}
+{% block title %}Student Attendance{% endblock %}
+{% block page_title %}Student-wise Attendance{% endblock %}
+{% block content %}
+<div class="card p-3 mb-4">
+  <h6 class="font-weight-bold mb-3">Select Student</h6>
+  <form method="GET" class="row">
+    <div class="col-md-3 form-group"><label class="form-label">Student</label>
+      <select name="adm" class="custom-select" required>
+        <option value="">-- Select Student --</option>
+        {% for s in students %}<option value="{{s.admissionNumber}}" {{'selected' if filter_adm==s.admissionNumber}}>{{s.firstName}} {{s.lastName}}</option>{% endfor %}
+      </select></div>
+    <div class="col-md-2 form-group"><label class="form-label">Filter</label>
+      <select name="type" id="ftype" class="custom-select" onchange="showFields()">
+        <option value="all" {{'selected' if filter_type=='all'}}>All Records</option>
+        <option value="date" {{'selected' if filter_type=='date'}}>By Date</option>
+        <option value="range" {{'selected' if filter_type=='range'}}>Date Range</option>
+      </select></div>
+    <div id="dDiv" class="col-md-2 form-group" style="display:none"><label class="form-label">Date</label><input type="date" name="date" class="form-control" value="{{filter_date}}"></div>
+    <div id="fDiv" class="col-md-2 form-group" style="display:none"><label class="form-label">From</label><input type="date" name="from_date" class="form-control" value="{{filter_from}}"></div>
+    <div id="tDiv" class="col-md-2 form-group" style="display:none"><label class="form-label">To</label><input type="date" name="to_date" class="form-control" value="{{filter_to}}"></div>
+    <div class="col-md-2 form-group d-flex align-items-end"><button class="btn btn-primary btn-block">Search</button></div>
+  </form>
+</div>
+
+{% if student_info %}
+<div class="card p-3 mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <h6 class="font-weight-bold mb-1">{{student_info.firstName}} {{student_info.lastName}}</h6>
+      <small class="text-muted">Admission: <code>{{student_info.admissionNumber}}</code></small>
+    </div>
+    <div class="col-md-6 text-md-right">
+      {% if pct is not none %}
+        <div style="font-size:2rem;font-weight:800;color:{{'#059669' if pct>=75 else '#d97706'}}">{{pct}}%</div>
+        <small class="text-muted">Attendance Percentage</small>
+        {% if pct < 75 %}
+        <div class="blow mt-1 d-inline-block"><i class="fas fa-exclamation-triangle mr-1"></i>Below 75% — Shortage!</div>
+        {% else %}
+        <div class="bgood mt-1 d-inline-block"><i class="fas fa-check-circle mr-1"></i>Good Standing</div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch"><h6>Attendance Records ({{records|length}})</h6>
+    {% if records %}
+    <small class="text-muted">Present: {{records|selectattr('status','equalto',1)|list|length}} &nbsp;|&nbsp; Absent: {{records|selectattr('status','equalto',0)|list|length}}</small>
+    {% endif %}
+  </div>
+  <table class="table table-hover table-sm mb-0">
+    <thead><tr><th>#</th><th>Date</th><th>Session</th><th>Term</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{loop.index}}</td><td>{{r.dateTimeTaken}}</td>
+      <td>{{r.sessionName}}</td><td>{{r.termName}}</td>
+      <td>{{'<span class="bp">Present</span>'|safe if r.status==1 else '<span class="ba">Absent</span>'|safe}}</td>
+    </tr>
+    {% else %}<tr><td colspan="5" class="text-center text-muted py-3">No records found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<script>
+function showFields(){
+  var v=document.getElementById('ftype').value;
+  document.getElementById('dDiv').style.display=v==='date'?'block':'none';
+  document.getElementById('fDiv').style.display=v==='range'?'block':'none';
+  document.getElementById('tDiv').style.display=v==='range'?'block':'none';
+}
+showFields();
+</script>
+{% endblock %}

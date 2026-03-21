@@ -1,0 +1,66 @@
+{% extends "teacher/base.html" %}
+{% block title %}Take Attendance{% endblock %}
+{% block page_title %}Take Attendance – {{today}}{% endblock %}
+{% block content %}
+{% if already_taken %}
+<div class="alert alert-warning">
+  <i class="fas fa-info-circle mr-2"></i>
+  <strong>{{today}}</strong> chi attendance aadheech gheta ali aahe.
+  <a href="{{url_for('teacher_view_attendance')}}" class="btn btn-sm btn-primary ml-3">View Records</a>
+</div>
+{% endif %}
+<div class="card">
+  <div class="ch">
+    <h6><i class="fas fa-clipboard-check mr-2"></i>Mark Attendance — {{today}}</h6>
+    {% if active %}<span class="bgood">{{active.sessionName}}</span>{% endif %}
+  </div>
+  <div class="p-3">
+    {% if not already_taken %}
+    <div class="mb-3 d-flex" style="gap:8px">
+      <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll(true)"><i class="fas fa-check-double mr-1"></i>Mark All Present</button>
+      <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll(false)"><i class="fas fa-times mr-1"></i>Mark All Absent</button>
+    </div>
+    <form method="POST" id="attForm">
+      <table class="table table-hover">
+        <thead><tr><th>#</th><th>Student Name</th><th>Admission No</th><th class="text-center">Present</th></tr></thead>
+        <tbody>
+        {% for s in students %}
+        <tr id="r{{loop.index}}">
+          <td>{{loop.index}}</td>
+          <td><strong>{{s.firstName}} {{s.lastName}}</strong></td>
+          <td><code>{{s.admissionNumber}}</code></td>
+          <td class="text-center">
+            <input type="checkbox" name="present" value="{{s.admissionNumber}}"
+              id="c{{loop.index}}" {{'checked' if s.att_status==1}}
+              onchange="cr({{loop.index}},this.checked)"
+              style="width:20px;height:20px;cursor:pointer;accent-color:#10b981">
+          </td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="text-center text-muted py-3">No students.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+      {% if students %}<button type="submit" class="btn btn-primary btn-lg px-5"><i class="fas fa-save mr-2"></i>Save Attendance</button>{% endif %}
+    </form>
+    {% else %}
+    <table class="table table-hover">
+      <thead><tr><th>#</th><th>Name</th><th>Admission No</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for s in students %}
+      <tr>
+        <td>{{loop.index}}</td>
+        <td><strong>{{s.firstName}} {{s.lastName}}</strong></td>
+        <td><code>{{s.admissionNumber}}</code></td>
+        <td>{{'<span class="bp">Present</span>'|safe if s.att_status==1 else '<span class="ba">Absent</span>'|safe}}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
+<script>
+function cr(i,p){var r=document.getElementById('r'+i);if(r)r.style.background=p?'#f0fdf4':'#fff1f2'}
+function markAll(v){document.querySelectorAll('input[type=checkbox]').forEach(function(c,i){c.checked=v;cr(i+1,v)})}
+document.querySelectorAll('input[type=checkbox]').forEach(function(c,i){cr(i+1,c.checked)})
+</script>
+{% endblock %}

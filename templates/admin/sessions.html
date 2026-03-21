@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% block title %}Sessions{% endblock %}
+{% block page_title %}Sessions &amp; Terms{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <div class="card p-3 mb-4">
+      <h6 class="font-weight-bold mb-3">Add Session</h6>
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div class="form-group"><label class="form-label">Academic Year</label>
+        <input type="text" name="sessionName" class="form-control" placeholder="e.g. 2025/2026" required></div>
+        <div class="form-group"><label class="form-label">Term</label>
+        <select name="termId" class="custom-select" required>
+        {% for t in terms %}<option value="{{t.Id}}">{{t.termName}}</option>{% endfor %}</select></div>
+        <button class="btn btn-primary btn-block">Add</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card">
+      <div class="ch"><h6>All Sessions</h6></div>
+      <table class="table table-hover mb-0">
+        <thead><tr><th>#</th><th>Year</th><th>Term</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for s in sessions %}
+        <tr><td>{{loop.index}}</td><td>{{s.sessionName}}</td><td>{{s.termName}}</td>
+        <td><span class="{{'bact' if s.isActive else 'bina'}}">{{ 'Active' if s.isActive else 'Inactive' }}</span></td>
+        <td>
+          {% if not s.isActive %}
+          <form method="POST" style="display:inline"><input type="hidden" name="action" value="activate"><input type="hidden" name="id" value="{{s.Id}}">
+          <button class="btn btn-sm btn-success mr-1">Activate</button></form>
+          {% else %}
+          <form method="POST" style="display:inline"><input type="hidden" name="action" value="deactivate"><input type="hidden" name="id" value="{{s.Id}}">
+          <button class="btn btn-sm btn-secondary mr-1">Deactivate</button></form>
+          {% endif %}
+          <form method="POST" style="display:inline" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{s.Id}}">
+          <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></form>
+        </td></tr>
+        {% else %}<tr><td colspan="5" class="text-center text-muted py-3">No sessions yet.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

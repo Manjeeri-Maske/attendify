@@ -1,0 +1,30 @@
+{% extends "teacher/base.html" %}
+{% block title %}My Students{% endblock %}
+{% block page_title %}My Students{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="ch"><h6>Students in My Class ({{students|length}})</h6></div>
+  <table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>Name</th><th>Admission No</th><th>Class</th><th>Division</th><th>Total Days</th><th>Present</th><th>Attendance %</th></tr></thead>
+    <tbody>
+    {% for s in students %}
+    <tr>
+      <td>{{loop.index}}</td>
+      <td><strong>{{s.firstName}} {{s.lastName}}</strong></td>
+      <td><code>{{s.admissionNumber}}</code></td>
+      <td>{{s.className}}</td>
+      <td>{{s.classArmName}}</td>
+      <td>{{s.total_days or 0}}</td>
+      <td>{{s.present_days or 0}}</td>
+      <td>
+        {% if s.pct is not none %}
+          {% if s.pct >= 75 %}<span class="bgood">{{s.pct}}%</span>
+          {% else %}<span class="blow">{{s.pct}}% ⚠</span>{% endif %}
+        {% else %}<span class="bina">—</span>{% endif %}
+      </td>
+    </tr>
+    {% else %}<tr><td colspan="8" class="text-center text-muted py-3">No students.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

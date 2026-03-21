@@ -1,0 +1,113 @@
+{% extends "teacher/base.html" %}
+{% block title %}Dashboard – Attendify{% endblock %}
+{% block page_title %}Teacher Dashboard{% endblock %}
+{% block extra_css %}<style>.chart-wrap{height:200px}</style>{% endblock %}
+{% block content %}
+
+{% if class_info %}
+<div class="alert alert-success mb-4">
+  <i class="fas fa-chalkboard mr-2"></i>
+  Your Class: <strong>{{class_info.className}}</strong> &nbsp;|&nbsp; Division: <strong>{{class_info.classArmName}}</strong>
+  &nbsp;|&nbsp; Date: <strong>{{today}}</strong>
+</div>
+{% else %}
+<div class="alert alert-warning mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>You have not been assigned a class yet. Please contact Admin.</div>
+{% endif %}
+
+<div class="row mb-4">
+  <div class="col-md-4 mb-3">
+    <div class="sc" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">
+      <div class="si"><i class="fas fa-users"></i></div>
+      <div><div class="sn">{{total}}</div><div class="sl">Total Students</div></div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="sc" style="background:linear-gradient(135deg,#10b981,#059669)">
+      <div class="si"><i class="fas fa-user-check"></i></div>
+      <div><div class="sn">{{present_today}}</div><div class="sl">Present Today</div></div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="sc" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
+      <div class="si"><i class="fas fa-user-times"></i></div>
+      <div><div class="sn">{{total - present_today}}</div><div class="sl">Absent Today</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  {% if att_summary %}
+  <div class="col-lg-5 mb-4">
+    <div class="card">
+      <div class="ch"><h6><i class="fas fa-chart-pie mr-2 text-success"></i>Today's Overview</h6></div>
+      <div class="p-3"><div class="chart-wrap"><canvas id="pieChart"></canvas></div></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="col-lg-{% if att_summary %}7{% else %}12{% endif %} mb-4">
+    <div class="card">
+      <div class="ch">
+        <h6><i class="fas fa-percentage mr-2 text-warning"></i>Student Attendance %</h6>
+        {% if low_students %}<span class="blow">{{low_students|length}} below 75%</span>{% endif %}
+      </div>
+      <div style="max-height:280px;overflow-y:auto">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Student</th><th>Days</th><th>Attendance</th></tr></thead>
+          <tbody>
+          {% for s in att_summary %}
+          <tr>
+            <td><strong>{{s.firstName}} {{s.lastName}}</strong></td>
+            <td>{{s.present_days}}/{{s.total_days}}</td>
+            <td>
+              {% if s.pct is not none %}
+                {% if s.pct >= 75 %}
+                  <span class="bgood">{{s.pct}}%</span>
+                {% else %}
+                  <span class="blow">{{s.pct}}% ⚠</span>
+                {% endif %}
+                <div class="progress mt-1" style="height:4px">
+                  <div class="progress-bar {{'bg-success' if s.pct>=75 else 'bg-warning'}}" style="width:{{s.pct}}%"></div>
+                </div>
+              {% else %}
+                <span class="bina">No data</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="text-center text-muted py-3">No attendance data yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3">
+  <h6 class="font-weight-bold mb-3" style="color:#064e3b">Quick Actions</h6>
+  <div class="d-flex flex-wrap" style="gap:10px">
+    <a href="{{url_for('teacher_attendance')}}"        class="btn btn-primary"><i class="fas fa-clipboard-check mr-1"></i>Take Attendance</a>
+    <a href="{{url_for('teacher_view_attendance')}}"   class="btn btn-success"><i class="fas fa-eye mr-1"></i>View Records</a>
+    <a href="{{url_for('teacher_student_attendance')}}" class="btn btn-warning"><i class="fas fa-user-clock mr-1"></i>Student-wise</a>
+    <a href="{{url_for('teacher_download')}}"          class="btn btn-info"><i class="fas fa-download mr-1"></i>Download CSV</a>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+{% if att_summary and total > 0 %}
+var ctx=document.getElementById('pieChart').getContext('2d');
+new Chart(ctx,{
+  type:'doughnut',
+  data:{
+    labels:['Present','Absent'],
+    datasets:[{data:[{{present_today}},{{total - present_today}}],backgroundColor:['rgba(16,185,129,.85)','rgba(239,68,68,.75)'],borderWidth:0,hoverOffset:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(c){return c.label+': '+c.parsed+' students ('+Math.round(c.parsed/{{total}}*100)+'%)'}}}}}
+});
+{% endif %}
+</script>
+{% endblock %}

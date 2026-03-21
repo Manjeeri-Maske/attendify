@@ -1,0 +1,39 @@
+{% extends "teacher/base.html" %}
+{% block title %}View Attendance{% endblock %}
+{% block page_title %}View Attendance Records{% endblock %}
+{% block content %}
+<div class="card p-3 mb-4">
+  <h6 class="font-weight-bold mb-3">Filter Records</h6>
+  <form method="GET" class="row">
+    <div class="col-md-2 form-group"><label class="form-label">Date</label><input type="date" name="date" class="form-control" value="{{filter_date}}"></div>
+    <div class="col-md-2 form-group"><label class="form-label">From</label><input type="date" name="from_date" class="form-control" value="{{filter_from}}"></div>
+    <div class="col-md-2 form-group"><label class="form-label">To</label><input type="date" name="to_date" class="form-control" value="{{filter_to}}"></div>
+    <div class="col-md-3 form-group"><label class="form-label">Student</label>
+      <select name="adm" class="custom-select"><option value="">-- All Students --</option>
+      {% for s in students %}<option value="{{s.admissionNumber}}" {{'selected' if filter_adm==s.admissionNumber}}>{{s.firstName}} {{s.lastName}}</option>{% endfor %}</select></div>
+    <div class="col-md-1 form-group d-flex align-items-end"><button class="btn btn-primary btn-block">Go</button></div>
+    <div class="col-md-2 form-group d-flex align-items-end">
+      <a href="{{url_for('teacher_view_attendance')}}" class="btn btn-outline-secondary btn-block">Clear</a></div>
+  </form>
+</div>
+<div class="card">
+  <div class="ch">
+    <h6>Results – {{records|length}} records</h6>
+    <a href="{{url_for('teacher_download')}}" class="btn btn-sm btn-success"><i class="fas fa-download mr-1"></i>Download Today's CSV</a>
+  </div>
+  <table class="table table-hover table-sm mb-0">
+    <thead><tr><th>#</th><th>Name</th><th>Adm No</th><th>Session</th><th>Term</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{loop.index}}</td>
+      <td><strong>{{r.firstName}} {{r.lastName}}</strong></td>
+      <td><code>{{r.admissionNumber}}</code></td>
+      <td>{{r.sessionName}}</td><td>{{r.termName}}</td><td>{{r.dateTimeTaken}}</td>
+      <td>{{'<span class="bp">Present</span>'|safe if r.status==1 else '<span class="ba">Absent</span>'|safe}}</td>
+    </tr>
+    {% else %}<tr><td colspan="7" class="text-center text-muted py-4">No records found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendify – Login</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-wrap { width: 100%; max-width: 420px; }
+  .brand { text-align: center; margin-bottom: 28px; }
+  .brand .icon-wrap {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    box-shadow: 0 8px 24px rgba(59,130,246,.4);
+  }
+  .brand .icon-wrap i { font-size: 28px; color: #fff; }
+  .brand h2 { color: #fff; font-weight: 800; font-size: 1.8rem; margin: 0; }
+  .brand p  { color: rgba(255,255,255,.65); font-size: .9rem; margin: 4px 0 0; }
+
+  .login-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.35);
+  }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    font-size: .78rem; font-weight: 700; color: #374151;
+    display: block; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+
+  /* INPUT & SELECT — identical sizing */
+  .field {
+    display: block;
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    font-size: 1rem;
+    color: #111827;
+    background: #fff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    transition: border-color .2s, box-shadow .2s;
+    line-height: 48px;
+  }
+  .field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    outline: none;
+  }
+
+  /* SELECT specific fixes */
+  select.field {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  select.field option {
+    color: #111827;
+    background: #fff;
+    font-size: 1rem;
+    padding: 8px;
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 4px 16px rgba(37,99,235,.35);
+    margin-top: 4px;
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.45); }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; color: #9ca3af; font-size: .85rem;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: #e5e7eb;
+  }
+
+  .btn-register {
+    display: block; width: 100%; padding: 13px;
+    background: #fff; color: #374151;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: .95rem; font-weight: 600;
+    text-align: center; text-decoration: none;
+    transition: all .2s;
+  }
+  .btn-register:hover { border-color: #3b82f6; color: #2563eb; text-decoration: none; }
+
+  .alert { border-radius: 10px; font-size: .9rem; border: none; padding: 10px 14px; margin-bottom: 16px; }
+  .alert-danger  { background: #fef2f2; color: #991b1b; }
+  .alert-success { background: #f0fdf4; color: #166534; }
+  .alert-warning { background: #fffbeb; color: #92400e; }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="brand">
+    <div class="icon-wrap"><i class="fas fa-graduation-cap"></i></div>
+    <h2>Attendify</h2>
+    <p>Student Attendance Management System</p>
+  </div>
+
+  <div class="login-card">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label">Login As</label>
+        <select name="role" class="field" required>
+          <option value="" disabled selected>-- Select Role --</option>
+          <option value="admin">Administrator</option>
+          <option value="teacher">Class Teacher</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="field" placeholder="your@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="field" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-login">
+        <i class="fas fa-sign-in-alt" style="margin-right:8px"></i>Login
+      </button>
+    </form>
+
+    <div class="divider">OR</div>
+
+    <a href="/register" class="btn-register">
+      <i class="fas fa-user-plus" style="margin-right:8px"></i>Create New Account
+    </a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block title %}Class Arms{% endblock %}
+{% block page_title %}Manage Class Arms{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <div class="card p-3 mb-4">
+      <h6 class="font-weight-bold mb-3">Add Division</h6>
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div class="form-group"><label class="form-label">Class</label>
+        <select name="classId" class="custom-select" required><option value="">-- Select --</option>
+        {% for c in classes %}<option value="{{c.Id}}">{{c.className}}</option>{% endfor %}</select></div>
+        <div class="form-group"><label class="form-label">Arm Name</label>
+        <input type="text" name="armName" class="form-control" placeholder="e.g. Division A" required></div>
+        <button class="btn btn-primary btn-block">Add</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card">
+      <div class="ch"><h6>All Arms ({{arms|length}})</h6></div>
+      <table class="table table-hover mb-0">
+        <thead><tr><th>#</th><th>Class</th><th>Arm</th><th>Assigned</th><th>Action</th></tr></thead>
+        <tbody>
+        {% for a in arms %}
+        <tr><td>{{loop.index}}</td><td>{{a.className}}</td><td>{{a.classArmName}}</td>
+        <td><span class="{{'bact' if a.isAssigned else 'bina'}}">{{ 'Yes' if a.isAssigned else 'No' }}</span></td>
+        <td><form method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
+          <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{a.Id}}">
+          <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></form></td></tr>
+        {% else %}<tr><td colspan="5" class="text-center text-muted py-3">No arms yet.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendify – Register</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f172a,#1e3a8a,#1d4ed8);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .wrap{width:100%;max-width:520px}
+  .brand{text-align:center;margin-bottom:24px}
+  .brand .iw{width:60px;height:60px;background:linear-gradient(135deg,#10b981,#059669);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 20px rgba(16,185,129,.4)}
+  .brand .iw i{font-size:24px;color:#fff}
+  .brand h2{color:#fff;font-weight:800;font-size:1.6rem;margin:0}
+  .brand p{color:rgba(255,255,255,.65);font-size:.88rem}
+  .card{background:#fff;border-radius:20px;padding:30px;box-shadow:0 24px 64px rgba(0,0,0,.35);border:none}
+  .form-label{font-size:.78rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
+  .form-control,.custom-select{border-radius:10px;border:1.5px solid #e5e7eb;padding:10px 13px;font-size:.93rem}
+  .form-control:focus,.custom-select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);outline:none}
+  .teacher-fields{display:none}
+  .section-title{font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;padding-bottom:8px;border-bottom:1px solid #f3f4f6;margin:18px 0 14px}
+  .btn-reg{background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:12px;padding:13px;font-size:1rem;font-weight:700;width:100%;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(5,150,105,.3)}
+  .btn-reg:hover{transform:translateY(-1px)}
+  .login-link{text-align:center;margin-top:16px;font-size:.9rem;color:#6b7280}
+  .login-link a{color:#2563eb;font-weight:700;text-decoration:none}
+  .alert{border-radius:10px;border:none;font-size:.9rem}
+  .alert-danger{background:#fef2f2;color:#991b1b}
+  .alert-success{background:#f0fdf4;color:#166534}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="iw"><i class="fas fa-user-plus"></i></div>
+    <h2>Register</h2>
+    <p>Create your Attendify account</p>
+  </div>
+  <div class="card">
+    {% with msgs=get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in msgs %}<div class="alert alert-{{cat}} py-2 mb-3">{{msg}}</div>{% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select name="role" id="roleSelect" class="custom-select" required onchange="toggleTeacher()">
+          <option value="">-- -- Select Role -- --</option>
+          <option value="admin">Administrator</option>
+          <option value="teacher">Class Teacher</option>
+        </select>
+      </div>
+      <div class="section-title">Personal Information</div>
+      <div class="row">
+        <div class="col-6 form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" name="firstName" class="form-control" placeholder="Rahul" required>
+        </div>
+        <div class="col-6 form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="lastName" class="form-control" placeholder="Sharma">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+      </div>
+      <div class="row">
+        <div class="col-6 form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" placeholder="Min. 6 characters" required>
+        </div>
+        <div class="col-6 form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" name="password2" class="form-control" placeholder="Repeat" required>
+        </div>
+      </div>
+      <div class="teacher-fields" id="teacherFields">
+        <div class="section-title">Teacher Details</div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="text" name="phone" class="form-control" placeholder="9876543210">
+        </div>
+        <div class="row">
+          <div class="col-6 form-group">
+            <label class="form-label">Assigned Class</label>
+            <select name="classId" id="classSelect" class="custom-select" onchange="loadArms()">
+              <option value="">-- Select Class --</option>
+              {% for c in classes %}<option value="{{c.Id}}">{{c.className}}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-6 form-group">
+            <label class="form-label">Division</label>
+            <select name="classArmId" id="armSelect" class="custom-select">
+              <option value="">-- Select Division --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn-reg mt-2"><i class="fas fa-user-plus mr-2"></i>Register</button>
+    </form>
+    <div class="login-link">Already have an account? <a href="/">Login</a></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleTeacher(){document.getElementById('teacherFields').style.display=document.getElementById('roleSelect').value==='teacher'?'block':'none'}
+function loadArms(){var cid=document.getElementById('classSelect').value,sel=document.getElementById('armSelect');sel.innerHTML='<option value="">-- Division --</option>';if(!cid)return;fetch('/ajax/arms/'+cid).then(r=>r.json()).then(d=>d.forEach(a=>{var o=document.createElement('option');o.value=a.id;o.textContent=a.name;sel.appendChild(o)}))}
+</script>
+</body>
+</html>

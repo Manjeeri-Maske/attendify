@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block title %}Teachers{% endblock %}
+{% block page_title %}Manage Teachers{% endblock %}
+{% block content %}
+<div class="card p-3 mb-4">
+  <h6 class="font-weight-bold mb-3">Add New Teacher</h6>
+  <form method="POST">
+    <input type="hidden" name="action" value="add">
+    <div class="row">
+      <div class="col-md-2 form-group"><label class="form-label">First Name</label><input type="text" name="firstName" class="form-control" required></div>
+      <div class="col-md-2 form-group"><label class="form-label">Last Name</label><input type="text" name="lastName" class="form-control" required></div>
+      <div class="col-md-3 form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
+      <div class="col-md-2 form-group"><label class="form-label">Password</label><input type="password" name="password" class="form-control" required></div>
+      <div class="col-md-3 form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control"></div>
+      <div class="col-md-4 form-group"><label class="form-label">Class</label>
+        <select name="classId" class="custom-select" required><option value="">-- Class --</option>
+        {% for c in classes %}<option value="{{c.Id}}">{{c.className}}</option>{% endfor %}</select></div>
+      <div class="col-md-4 form-group"><label class="form-label">Division</label>
+        <select name="classArmId" class="custom-select" required><option value="">-- Division --</option>
+        {% for a in arms %}<option value="{{a.Id}}">{{a.className}} – {{a.classArmName}}</option>{% endfor %}</select></div>
+      <div class="col-md-4 form-group d-flex align-items-end"><button class="btn btn-primary btn-block">Add Teacher</button></div>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <div class="ch"><h6>All Teachers ({{teachers|length}})</h6></div>
+  <table class="table table-hover mb-0">
+    <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Class</th><th>Division</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for t in teachers %}
+    <tr>
+      <td>{{loop.index}}</td>
+      <td><strong>{{t.firstName}} {{t.lastName}}</strong></td>
+      <td>{{t.emailAddress}}</td>
+      <td>{{t.phoneNo or '—'}}</td>
+      <td>{{t.className or '<span class="text-muted">Not assigned</span>'|safe}}</td>
+      <td>{{t.classArmName or '—'}}</td>
+      <td>
+        <form method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
+          <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{t.Id}}">
+          <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+    {% else %}<tr><td colspan="7" class="text-center text-muted py-3">No teachers yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

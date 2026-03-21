@@ -1,0 +1,103 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard – Attendify{% endblock %}
+{% block page_title %}Administrator Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+.chart-wrap{position:relative;height:220px}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="row mb-4">
+  {% set cards=[('Total Students',stats.students,'fas fa-users','#3b82f6','#1d4ed8'),
+                ('Class Teachers',stats.teachers,'fas fa-chalkboard-teacher','#10b981','#059669'),
+                ('Classes',stats.classes,'fas fa-chalkboard','#8b5cf6','#7c3aed'),
+                ('Class Arms',stats.arms,'fas fa-code-branch','#f59e0b','#d97706'),
+                ('Sessions',stats.sessions,'fas fa-calendar-alt','#ec4899','#db2777'),
+                ('Attendance Records',stats.attendance,'fas fa-clipboard-check','#06b6d4','#0891b2')] %}
+  {% for lbl,val,ico,c1,c2 in cards %}
+  <div class="col-xl-4 col-md-6 mb-3">
+    <div class="sc" style="background:linear-gradient(135deg,{{c1}},{{c2}})">
+      <div class="si"><i class="{{ico}}"></i></div>
+      <div><div class="sn">{{val}}</div><div class="sl">{{lbl}}</div></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row">
+  {% if chart_data %}
+  <div class="col-lg-7 mb-4">
+    <div class="card">
+      <div class="ch"><h6><i class="fas fa-chart-bar mr-2 text-primary"></i>Attendance by Class</h6></div>
+      <div class="p-3"><div class="chart-wrap"><canvas id="attChart"></canvas></div></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="col-lg-{% if chart_data %}5{% else %}12{% endif %} mb-4">
+    <div class="card">
+      <div class="ch">
+        <h6><i class="fas fa-exclamation-triangle mr-2 text-warning"></i>Low Attendance Alert</h6>
+        <span class="blow">Below 75%</span>
+      </div>
+      <div class="p-2">
+        {% if low_att %}
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Student</th><th>Class</th><th>Attendance %</th></tr></thead>
+          <tbody>
+          {% for s in low_att %}
+          <tr>
+            <td><strong>{{s.firstName}} {{s.lastName}}</strong><br><small class="text-muted">{{s.admissionNumber}}</small></td>
+            <td>{{s.className}}</td>
+            <td>
+              <span class="blow">{{s.pct}}%</span>
+              <div class="progress mt-1" style="height:5px">
+                <div class="progress-bar bg-warning" style="width:{{s.pct}}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+          <i class="fas fa-check-circle fa-2x text-success mb-2 d-block"></i>
+          All students have attendance above 75%!
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3">
+  <h6 class="font-weight-bold mb-3" style="color:#0f172a">Quick Actions</h6>
+  <div class="d-flex flex-wrap" style="gap:10px">
+    <a href="{{url_for('admin_classes')}}"  class="btn btn-primary"><i class="fas fa-plus mr-1"></i>Add Class</a>
+    <a href="{{url_for('admin_teachers')}}" class="btn btn-success"><i class="fas fa-plus mr-1"></i>Add Teacher</a>
+    <a href="{{url_for('admin_students')}}" class="btn btn-info"><i class="fas fa-plus mr-1"></i>Add Student</a>
+    <a href="{{url_for('admin_sessions')}}" class="btn btn-warning"><i class="fas fa-calendar-alt mr-1"></i>Manage Sessions</a>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+{% if chart_data %}
+var ctx=document.getElementById('attChart').getContext('2d');
+new Chart(ctx,{
+  type:'bar',
+  data:{
+    labels:[{% for r in chart_data %}'{{r.className}}'{% if not loop.last %},{% endif %}{% endfor %}],
+    datasets:[
+      {label:'Present',data:[{% for r in chart_data %}{{r.present}}{% if not loop.last %},{% endif %}{% endfor %}],backgroundColor:'rgba(16,185,129,.8)',borderRadius:6},
+      {label:'Absent', data:[{% for r in chart_data %}{{r.absent}}{% if not loop.last %},{% endif %}{% endfor %}],backgroundColor:'rgba(239,68,68,.7)',borderRadius:6}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'}}}}
+});
+{% endif %}
+</script>
+{% endblock %}
