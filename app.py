@@ -493,4 +493,8 @@ if __name__=='__main__':
     os.makedirs('instance',exist_ok=True)
     init_db()
     print("\n"+"="*50+"\n  ✅  Attendify v2.0 is running!\n  🌐  Open: http://127.0.0.1:5000\n"+"="*50+"\n")
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False) sed -i '' "s/app.run(debug=True, port=5001)/app.run(host='0.0.0.0', port=5000, debug=False)/" app.py tail -5 app.py
+git add .
+git commit -m "Fix Render port"
+git push
+
