@@ -470,9 +470,9 @@ def teacher_student_attendance():
         filter_from=ff,filter_to=fto,pct=pct)
 
 # ── DOWNLOAD CSV ─────────────────────────────────────────────
-@app.route('/teacher/download-student/<adm_no>')
-@teacher_required
-def teacher_download_student(adm_no):
+@app.route('/admin/download-student/<adm_no>')
+@admin_required
+def admin_download_student(adm_no):
     db = get_db()
     records = db.execute("""
         SELECT s.firstName, s.lastName, s.admissionNumber,
@@ -485,11 +485,10 @@ def teacher_download_student(adm_no):
         JOIN tblclassarms ca   ON ca.Id=a.classArmId
         JOIN tblsessionterm st ON st.Id=a.sessionTermId
         JOIN tblterm tt        ON tt.Id=st.termId
-        WHERE a.admissionNo=? AND a.classId=? AND a.classArmId=?
+        WHERE a.admissionNo=?
         ORDER BY a.dateTimeTaken DESC
-    """, (adm_no, session['classId'], session['classArmId'])).fetchall()
+    """, (adm_no,)).fetchall()
     db.close()
-
     out = io.StringIO()
     w = csv.writer(out)
     w.writerow(['#','First Name','Last Name','Admission No',
@@ -500,7 +499,6 @@ def teacher_download_student(adm_no):
                     r['sessionName'], r['termName'],
                     'Present' if r['status']==1 else 'Absent',
                     r['dateTimeTaken']])
-
     resp = make_response(out.getvalue())
     resp.headers['Content-Disposition'] = f'attachment; filename=attendance_{adm_no}.csv'
     resp.headers['Content-Type'] = 'text/csv'
