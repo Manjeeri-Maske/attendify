@@ -472,26 +472,43 @@ def teacher_student_attendance():
 # ── DOWNLOAD CSV ─────────────────────────────────────────────
 @app.route('/teacher/download')
 @teacher_required
-def teacher_download():
-    db=get_db(); today=date.today().isoformat(); cid=session['classId']; aid=session['classArmId']
-    records=db.execute("""SELECT s.firstName,s.lastName,s.admissionNumber,c.className,ca.classArmName,st.sessionName,tt.termName,a.status,a.dateTimeTaken
-        FROM tblattendance a JOIN tblstudents s ON s.admissionNumber=a.admissionNo
-        JOIN tblclass c ON c.Id=a.classId JOIN tblclassarms ca ON ca.Id=a.classArmId
-        JOIN tblsessionterm st ON st.Id=a.sessionTermId JOIN tblterm tt ON tt.Id=st.termId
-        WHERE a.classId=? AND a.classArmId=? AND a.dateTimeTaken=? ORDER BY s.firstName""",(cid,aid,today)).fetchall()
+def teacher_download_student(adm_no):
+    db = get_db()
+    records = db.execute("""
+        SELECT s.firstName, s.lastName, s.admissionNumber,
+               c.className, ca.classArmName,
+               st.sessionName, tt.termName,
+               a.status, a.dateTimeTaken
+        FROM tblattendance a
+        JOIN tblstudents s     ON s.admissionNumber=a.admissionNo
+        JOIN tblclass c        ON c.Id=a.classId
+        JOIN tblclassarms ca   ON ca.Id=a.classArmId
+        JOIN tblsessionterm st ON st.Id=a.sessionTermId
+        JOIN tblterm tt        ON tt.Id=st.termId
+        WHERE a.admissionNo=? AND a.classId=? AND a.classArmId=?
+        ORDER BY a.dateTimeTaken DESC
+    """, (adm_no, session['classId'], session['classArmId'])).fetchall()
     db.close()
-    out=io.StringIO(); w=csv.writer(out)
-    w.writerow(['#','First Name','Last Name','Admission No','Class','Division','Session','Term','Status','Date'])
-    for i,r in enumerate(records,1):
-        w.writerow([i,r['firstName'],r['lastName'],r['admissionNumber'],r['className'],r['classArmName'],r['sessionName'],r['termName'],'Present' if r['status']==1 else 'Absent',r['dateTimeTaken']])
-    resp=make_response(out.getvalue())
-    resp.headers['Content-Disposition']=f'attachment; filename=attendance_{today}.csv'
-    resp.headers['Content-Type']='text/csv'
+
+    out = io.StringIO()
+    w = csv.writer(out)
+    w.writerow(['#','First Name','Last Name','Admission No',
+                'Class','Division','Session','Term','Status','Date'])
+    for i, r in enumerate(records, 1):
+        w.writerow([i, r['firstName'], r['lastName'], r['admissionNumber'],
+                    r['className'], r['classArmName'],
+                    r['sessionName'], r['termName'],
+                    'Present' if r['status']==1 else 'Absent',
+                    r['dateTimeTaken']])
+
+    resp = make_response(out.getvalue())
+    resp.headers['Content-Disposition'] = f'attachment; filename=attendance_{adm_no}.csv'
+    resp.headers['Content-Type'] = 'text/csv'
     return resp
 
 if __name__=='__main__':
     os.makedirs('instance',exist_ok=True)
     init_db()
-    print("\n"+"="*50+"\n  ✅  Attendify v2.0 is running!\n  🌐  Open: http://127.0.0.1:5000\n"+"="*50+"\n")
+    print("\n"+"="*50+"\n  ✅  Attendify is running!\n  🌐  Open: http://127.0.0.1:5000\n"+"="*50+"\n")
     app.run(host='0.0.0.0', port=5000, debug=False)
 
