@@ -1,5 +1,5 @@
 """
-ATTENDIFY v2.0 - Student Attendance Management System
+ATTENDIFY - Student Attendance Management System
 Professional Edition | BCA Final Year Project
 """
 from flask import (Flask, render_template, request, redirect,
@@ -9,7 +9,7 @@ from datetime import date
 import sqlite3, hashlib, csv, io, os
 
 app = Flask(__name__)
-app.secret_key = "attendify_v2_bca_2026"
+app.secret_key = "attendify_bca_2026"
 DATABASE = os.path.join("instance", "attendify.db")
 
 # ── DB ───────────────────────────────────────────────────────
