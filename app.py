@@ -1,5 +1,5 @@
 """
-ATTENDIFY v2- Student Attendance Management System
+ATTENDIFY v2 - Student Attendance Management System
 Professional Edition | BCA Final Year Project
 """
 from flask import (Flask, render_template, request, redirect,
