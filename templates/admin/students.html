@@ -22,22 +22,10 @@
     </div>
   </form>
 </div>
-
 <div class="card">
   <div class="ch"><h6>All Students ({{students|length}})</h6></div>
   <table class="table table-hover table-sm mb-0">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Admission No</th>
-        <th>Class</th>
-        <th>Division</th>
-        <th>Joined</th>
-        <th>Delete</th>
-        <th>Download</th>
-      </tr>
-    </thead>
+    <thead><tr><th>#</th><th>Name</th><th>Admission No</th><th>Class</th><th>Division</th><th>Joined</th><th>Action</th></tr></thead>
     <tbody>
     {% for s in students %}
     <tr>
@@ -47,23 +35,11 @@
       <td>{{s.className or '—'}}</td>
       <td>{{s.classArmName or '—'}}</td>
       <td>{{s.dateCreated}}</td>
-      <td>
-        <form method="POST" style="display:inline" onsubmit="return confirm('Delete this student?')">
-          <input type="hidden" name="action" value="delete">
-          <input type="hidden" name="id" value="{{s.Id}}">
-          <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-        </form>
-      </td>
-      <td>
-        <a href="/admin/download-student/{{s.admissionNumber}}"
-           class="btn btn-sm btn-success">
-          <i class="fas fa-download mr-1"></i>CSV
-        </a>
-      </td>
+      <td><form method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
+        <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{s.Id}}">
+        <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></form></td>
     </tr>
-    {% else %}
-    <tr><td colspan="8" class="text-center text-muted py-3">No students yet.</td></tr>
-    {% endfor %}
+    {% else %}<tr><td colspan="7" class="text-center text-muted py-3">No students yet.</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>

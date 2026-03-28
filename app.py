@@ -1,5 +1,5 @@
 """
-ATTENDIFY v2 - Student Attendance Management System
+ATTENDIFY v2.0 - Student Attendance Management System
 Professional Edition | BCA Final Year Project
 """
 from flask import (Flask, render_template, request, redirect,
@@ -470,38 +470,23 @@ def teacher_student_attendance():
         filter_from=ff,filter_to=fto,pct=pct)
 
 # ── DOWNLOAD CSV ─────────────────────────────────────────────
-@app.route('/admin/download-student/<adm_no>')
-@admin_required
-def admin_download_student(adm_no):
-    db = get_db()
-    records = db.execute("""
-        SELECT s.firstName, s.lastName, s.admissionNumber,
-               c.className, ca.classArmName,
-               st.sessionName, tt.termName,
-               a.status, a.dateTimeTaken
-        FROM tblattendance a
-        JOIN tblstudents s     ON s.admissionNumber=a.admissionNo
-        JOIN tblclass c        ON c.Id=a.classId
-        JOIN tblclassarms ca   ON ca.Id=a.classArmId
-        JOIN tblsessionterm st ON st.Id=a.sessionTermId
-        JOIN tblterm tt        ON tt.Id=st.termId
-        WHERE a.admissionNo=?
-        ORDER BY a.dateTimeTaken DESC
-    """, (adm_no,)).fetchall()
+@app.route('/teacher/download')
+@teacher_required
+def teacher_download():
+    db=get_db(); today=date.today().isoformat(); cid=session['classId']; aid=session['classArmId']
+    records=db.execute("""SELECT s.firstName,s.lastName,s.admissionNumber,c.className,ca.classArmName,st.sessionName,tt.termName,a.status,a.dateTimeTaken
+        FROM tblattendance a JOIN tblstudents s ON s.admissionNumber=a.admissionNo
+        JOIN tblclass c ON c.Id=a.classId JOIN tblclassarms ca ON ca.Id=a.classArmId
+        JOIN tblsessionterm st ON st.Id=a.sessionTermId JOIN tblterm tt ON tt.Id=st.termId
+        WHERE a.classId=? AND a.classArmId=? AND a.dateTimeTaken=? ORDER BY s.firstName""",(cid,aid,today)).fetchall()
     db.close()
-    out = io.StringIO()
-    w = csv.writer(out)
-    w.writerow(['#','First Name','Last Name','Admission No',
-                'Class','Division','Session','Term','Status','Date'])
-    for i, r in enumerate(records, 1):
-        w.writerow([i, r['firstName'], r['lastName'], r['admissionNumber'],
-                    r['className'], r['classArmName'],
-                    r['sessionName'], r['termName'],
-                    'Present' if r['status']==1 else 'Absent',
-                    r['dateTimeTaken']])
-    resp = make_response(out.getvalue())
-    resp.headers['Content-Disposition'] = f'attachment; filename=attendance_{adm_no}.csv'
-    resp.headers['Content-Type'] = 'text/csv'
+    out=io.StringIO(); w=csv.writer(out)
+    w.writerow(['#','First Name','Last Name','Admission No','Class','Division','Session','Term','Status','Date'])
+    for i,r in enumerate(records,1):
+        w.writerow([i,r['firstName'],r['lastName'],r['admissionNumber'],r['className'],r['classArmName'],r['sessionName'],r['termName'],'Present' if r['status']==1 else 'Absent',r['dateTimeTaken']])
+    resp=make_response(out.getvalue())
+    resp.headers['Content-Disposition']=f'attachment; filename=attendance_{today}.csv'
+    resp.headers['Content-Type']='text/csv'
     return resp
 
 if __name__=='__main__':
