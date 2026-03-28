@@ -470,7 +470,7 @@ def teacher_student_attendance():
         filter_from=ff,filter_to=fto,pct=pct)
 
 # ── DOWNLOAD CSV ─────────────────────────────────────────────
-@app.route('/teacher/download')
+@app.route('/teacher/download-student/<adm_no>')
 @teacher_required
 def teacher_download_student(adm_no):
     db = get_db()
